@@ -7,6 +7,7 @@ using ToDoList.Core.Managers.ToDo;
 using ToDoList.ModelViews.ModelViews.ToDo;
 using ToDoList.ModelViews.ModelViews.User;
 using ToDoList.Attributes;
+using System.IO;
 
 namespace ToDoList.Controllers
 {
@@ -68,7 +69,15 @@ namespace ToDoList.Controllers
             return Ok(res);
         }
 
-
+        [Route("api/toDo/retrieve/{fileName}")]
+        [HttpGet]
+        public IActionResult Retrieve(string fileName)
+        {
+            var folderPath = Directory.GetCurrentDirectory();
+            folderPath = $@"{folderPath}\{fileName}";
+            var byteArray = System.IO.File.ReadAllBytes(folderPath);
+            return File(byteArray, "image/jpeg", fileName);
+        }
         [Route("api/toDo/delete/{id}")]
         [HttpPatch]
         public IActionResult Delete(int id)
