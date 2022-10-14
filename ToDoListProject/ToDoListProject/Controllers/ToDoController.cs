@@ -50,22 +50,15 @@ namespace ToDoList.Controllers
         [HttpPost]
         public IActionResult Add([FromBody] AddToDoMV addToDoMV)
         {
-            if(LoggedInUser.Id!= addToDoMV.AssignedTo)
-            {
-                var res=AddTaskByAdmin(addToDoMV);
-                return Ok(res);
-            }else
-            {
-                var res = _toDoManager.AddTask(addToDoMV, addToDoMV.AssignedTo);
-                return Ok(res);
-            }          
+            var res = _toDoManager.AddTask(addToDoMV, LoggedInUser);
+            return Ok(res);
         }
 
         [Route("api/toDo/update")]
         [HttpPut]
-        public IActionResult Update([FromBody]UpdateToDoMV updateToDoMV)
+        public IActionResult Update([FromBody] UpdateToDoMV updateToDoMV)
         {
-            var res=_toDoManager.UpdateTask(updateToDoMV,LoggedInUser.Id);
+            var res = _toDoManager.UpdateTask(updateToDoMV, LoggedInUser.Id);
             return Ok(res);
         }
 
@@ -82,7 +75,7 @@ namespace ToDoList.Controllers
         [HttpPatch]
         public IActionResult Delete(int id)
         {
-            _toDoManager.DeleteTask(id,LoggedInUser.Id);
+            _toDoManager.DeleteTask(id, LoggedInUser.Id);
             return Ok();
         }
 
@@ -99,21 +92,11 @@ namespace ToDoList.Controllers
         [ToDoListAuthorize()]
         public IActionResult GetArchived()
         {
-            var res=_toDoManager.GetArchivedTasks();
+            var res = _toDoManager.GetArchivedTasks();
             return Ok(res);
         }
 
         #endregion Public
-
-        #region Private
-
-        [Route("api/toDo/addTaskByAdmin")]
-        [HttpPost]
-        [ToDoListAuthorize]
-        private ToDoMV AddTaskByAdmin(AddToDoMV addToDoMV)
-                                    => _toDoManager.AddTask(addToDoMV,LoggedInUser.Id);
-
-        #endregion Private
 
     }
 }

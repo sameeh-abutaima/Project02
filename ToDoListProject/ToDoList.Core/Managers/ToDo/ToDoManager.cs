@@ -11,7 +11,7 @@ using ToDoList.ModelViews.ModelViews.User;
 
 namespace ToDoList.Core.Managers.ToDo
 {
-    public class ToDoManager:IToDoManager
+    public class ToDoManager : IToDoManager
     {
         #region Dependency Injections
         private readonly ToDoListDbContext _context;
@@ -29,7 +29,7 @@ namespace ToDoList.Core.Managers.ToDo
         {
             var tasks = _context.ToDoes
                                 .Where(task => task.AssignedTo == loggedInUserId
-                                                    &&( string.IsNullOrWhiteSpace(searchText)
+                                                    && (string.IsNullOrWhiteSpace(searchText)
                                                     || (task.Title.Contains(searchText)
                                                     || task.Content.Contains(searchText))));
             if (!string.IsNullOrWhiteSpace(sortColumn) && sortDirection.Equals("ascending", StringComparison.InvariantCultureIgnoreCase))
@@ -117,10 +117,17 @@ namespace ToDoList.Core.Managers.ToDo
             return data;
 
         }
-        public ToDoMV AddTask(AddToDoMV addToDoMV,int assignedBy)
+
+        public ToDoMV AddTask(AddToDoMV addToDoMV, UserMV loggedInUser)
         {
+
+            if (!loggedInUser.IsAdmin && addToDoMV.AssignedTo != loggedInUser.Id)
+            {
+                throw new ServiceValidationException("No Permissions");
+            }
+
             var newToDo = _mapper.Map<ModelsDB.Models.ToDo>(addToDoMV);
-            newToDo.AssignedBy=assignedBy;
+            newToDo.AssignedBy = loggedInUser.Id;
 
             var url = "";
             if (!string.IsNullOrWhiteSpace(addToDoMV.ImageString))
@@ -140,11 +147,12 @@ namespace ToDoList.Core.Managers.ToDo
             var res = _mapper.Map<ToDoMV>(user);
             return res;
         }
+
         public ToDoMV UpdateTask(UpdateToDoMV updateToDoMV, int loggedInUserId)
         {
             var task = _context.ToDoes
-                                    .FirstOrDefault(task => task.Id == updateToDoMV.Id 
-                                                            &&task.AssignedBy==loggedInUserId)
+                                    .FirstOrDefault(task => task.Id == updateToDoMV.Id
+                                                            && task.AssignedBy == loggedInUserId)
                                     ?? throw new ServiceValidationException("Task not found");
 
             var url = "";
@@ -155,8 +163,8 @@ namespace ToDoList.Core.Managers.ToDo
             }
 
             task.Title = updateToDoMV.Title;
-            task.Content=updateToDoMV.Content;
-            if (task.User.IsAdmin && task.AssignedTo!=updateToDoMV.AssignedTo)
+            task.Content = updateToDoMV.Content;
+            if (task.User.IsAdmin && task.AssignedTo != updateToDoMV.AssignedTo)
             {
                 task.AssignedTo = updateToDoMV.AssignedTo;
             }
@@ -170,14 +178,16 @@ namespace ToDoList.Core.Managers.ToDo
             _context.SaveChanges();
             return _mapper.Map<ToDoMV>(task);
         }
-        public void DeleteTask(int id,int loggedInUserId)
+
+        public void DeleteTask(int id, int loggedInUserId)
         {
             var task = _context.ToDoes
                             .FirstOrDefault(task => task.Id == id && task.AssignedBy == loggedInUserId)
                             ?? throw new ServiceValidationException("No Permission Or Not Founded");
-            task.Archived= true;
+            task.Archived = true;
             _context.SaveChanges();
         }
+
         public void HasRead(int id, int loggedInUserId)
         {
             var task = _context.ToDoes
@@ -186,6 +196,7 @@ namespace ToDoList.Core.Managers.ToDo
             task.IsRead = true;
             _context.SaveChanges();
         }
+
         public List<ToDoMV> GetArchivedTasks()
         {
             _context.IgnoreFilter = true;
