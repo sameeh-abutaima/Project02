@@ -50,7 +50,7 @@ namespace ToDoList.Controllers
         [HttpPost]
         public IActionResult Add([FromBody] AddToDoMV addToDoMV)
         {
-            var res = _toDoManager.AddTask(addToDoMV, LoggedInUser);
+            var res = _toDoManager.AddTask(LoggedInUser,addToDoMV);
             return Ok(res);
         }
 
@@ -71,6 +71,7 @@ namespace ToDoList.Controllers
             var byteArray = System.IO.File.ReadAllBytes(folderPath);
             return File(byteArray, "image/jpeg", fileName);
         }
+
         [Route("api/toDo/delete/{id}")]
         [HttpPatch]
         public IActionResult Delete(int id)

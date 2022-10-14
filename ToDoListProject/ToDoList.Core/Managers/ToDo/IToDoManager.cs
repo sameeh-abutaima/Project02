@@ -13,7 +13,7 @@ namespace ToDoList.Core.Managers.ToDo
     {
         GetAllTasksResponse GetMyTasks(int loggedInUserId, int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "");
         GetAllTasksResponse GetAllTasks(int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "");
-        ToDoMV AddTask(AddToDoMV addToDoMV,UserMV loggedInUser);
+        ToDoMV AddTask(UserMV loggedInUser, AddToDoMV addToDoMV);
         ToDoMV UpdateTask(UpdateToDoMV updateToDoMV,int loggedInUserId);
         void DeleteTask(int id, int loggedInUserId);
         void HasRead(int id, int loggedInUserId);

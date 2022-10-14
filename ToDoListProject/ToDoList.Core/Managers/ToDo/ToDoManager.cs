@@ -118,7 +118,7 @@ namespace ToDoList.Core.Managers.ToDo
 
         }
 
-        public ToDoMV AddTask(AddToDoMV addToDoMV, UserMV loggedInUser)
+        public ToDoMV AddTask(UserMV loggedInUser, AddToDoMV addToDoMV)
         {
 
             if (!loggedInUser.IsAdmin && addToDoMV.AssignedTo != loggedInUser.Id)
@@ -208,11 +208,9 @@ namespace ToDoList.Core.Managers.ToDo
 
         #endregion Public Methods
 
-
         #region Private Methods
         //private static bool
         #endregion Private Methods
-
 
     }
 }
