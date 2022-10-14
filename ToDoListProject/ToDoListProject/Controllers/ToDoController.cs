@@ -14,6 +14,7 @@ namespace ToDoList.Controllers
     [Authorize]
     public class ToDoController : ApiBaseController
     {
+
         #region Dependency Injection
         private readonly IToDoManager _toDoManager;
         private readonly ILogger<ToDoController> _logger;
@@ -26,6 +27,7 @@ namespace ToDoList.Controllers
         }
         #endregion Dependency Injection
 
+        #region Public
         [HttpGet]
         [Route("api/toDo/allTasks")]
         [ToDoListAuthorize()]
@@ -92,6 +94,8 @@ namespace ToDoList.Controllers
             return Ok(res);
         }
 
+        #endregion Public
+
         #region Private
 
         [Route("api/toDo/addTaskByAdmin")]
@@ -101,7 +105,6 @@ namespace ToDoList.Controllers
                                     => _toDoManager.AddTask(addToDoMV,LoggedInUser.Id);
 
         #endregion Private
-
 
     }
 }
