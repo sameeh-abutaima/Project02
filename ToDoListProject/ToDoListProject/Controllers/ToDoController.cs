@@ -58,7 +58,7 @@ namespace ToDoList.Controllers
         [HttpPut]
         public IActionResult Update([FromBody] UpdateToDoMV updateToDoMV)
         {
-            var res = _toDoManager.UpdateTask(updateToDoMV, LoggedInUser.Id);
+            var res = _toDoManager.UpdateTask(LoggedInUser.Id, updateToDoMV);
             return Ok(res);
         }
 
@@ -76,7 +76,7 @@ namespace ToDoList.Controllers
         [HttpPatch]
         public IActionResult Delete(int id)
         {
-            _toDoManager.DeleteTask(id, LoggedInUser.Id);
+            _toDoManager.DeleteTask(LoggedInUser.Id, id);
             return Ok();
         }
 
@@ -84,7 +84,7 @@ namespace ToDoList.Controllers
         [HttpPatch]
         public IActionResult HasRead(int id)
         {
-            _toDoManager.HasRead(id, LoggedInUser.Id);
+            _toDoManager.HasRead(LoggedInUser.Id, id);
             return Ok();
         }
 

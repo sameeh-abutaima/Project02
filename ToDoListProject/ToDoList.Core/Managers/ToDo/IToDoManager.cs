@@ -14,9 +14,9 @@ namespace ToDoList.Core.Managers.ToDo
         GetAllTasksResponse GetMyTasks(int loggedInUserId, int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "");
         GetAllTasksResponse GetAllTasks(int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "");
         ToDoMV AddTask(UserMV loggedInUser, AddToDoMV addToDoMV);
-        ToDoMV UpdateTask(UpdateToDoMV updateToDoMV,int loggedInUserId);
-        void DeleteTask(int id, int loggedInUserId);
-        void HasRead(int id, int loggedInUserId);
-        List<ToDoMV> GetArchivedTasks();
+        ToDoMV UpdateTask(int loggedInUserId,UpdateToDoMV updateToDoMV);
+        void DeleteTask(int loggedInUserId,int id);
+        void HasRead(int loggedInUserId,int id);
+        GetAllTasksResponse GetArchivedTasks(int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "");
     }
 }

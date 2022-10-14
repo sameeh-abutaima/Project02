@@ -18,29 +18,35 @@ namespace ToDoList.Core.Managers.User
     {
 
         #region Dependency Injections
+
         private readonly ToDoListDbContext _context;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+
         public UserManager(ToDoListDbContext context, IMapper mapper,IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
             _configuration = configuration;
         }
+
         #endregion Dependency Injections 
 
         #region Public Methods
+
         public List<UserMV> GetUsers()
         {
             var users = _context.Users.ToList();
             return _mapper.Map<List<UserMV>>(users);
         }
+
         public List<UserMV> GetArchivedUsers()
         {
             _context.IgnoreFilter = true;
             var users = _context.Users.Where(usr=> usr.Archived);
             return _mapper.Map<List<UserMV>>(users);
         }
+
         public LoginResponseUserMV Login(LoginUserMV loginUserMV)
         {
             var user = _context.Users
@@ -116,9 +122,11 @@ namespace ToDoList.Core.Managers.User
             user.Archived = true;
             _context.SaveChanges();
         }
+
         #endregion Public Methods
 
         #region Private Methods
+
         private static string HashPassword(string pswrd)
                                         => BCrypt.Net.BCrypt.HashPassword(pswrd);
 
@@ -148,8 +156,6 @@ namespace ToDoList.Core.Managers.User
 
         private static bool VerifyHashPassword(string pswrd, string hashedPasword)
                                         => BCrypt.Net.BCrypt.Verify(pswrd, hashedPasword);
-
-        
 
         #endregion Private Methods
     }

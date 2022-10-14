@@ -25,7 +25,12 @@ namespace ToDoList.Core.Managers.ToDo
 
         #region Public Methods
 
-        public GetAllTasksResponse GetMyTasks(int loggedInUserId, int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "")
+        public GetAllTasksResponse GetMyTasks(int loggedInUserId, 
+                                              int page = 1, 
+                                              int pageSize = 10, 
+                                              string sortColumn = "", 
+                                              string sortDirection = "ascending", 
+                                              string searchText = "")
         {
             var tasks = _context.ToDoes
                                 .Where(task => task.AssignedTo == loggedInUserId
@@ -71,7 +76,11 @@ namespace ToDoList.Core.Managers.ToDo
 
             return data;
         }
-        public GetAllTasksResponse GetAllTasks(int page = 1, int pageSize = 10, string sortColumn = "", string sortDirection = "ascending", string searchText = "")
+        public GetAllTasksResponse GetAllTasks(int page = 1, 
+                                               int pageSize = 10, 
+                                               string sortColumn = "", 
+                                               string sortDirection = "ascending", 
+                                               string searchText = "")
         {
             var tasks = _context.ToDoes
                                 .Where(task => string.IsNullOrWhiteSpace(searchText)
@@ -148,7 +157,7 @@ namespace ToDoList.Core.Managers.ToDo
             return res;
         }
 
-        public ToDoMV UpdateTask(UpdateToDoMV updateToDoMV, int loggedInUserId)
+        public ToDoMV UpdateTask(int loggedInUserId, UpdateToDoMV updateToDoMV)
         {
             var task = _context.ToDoes
                                     .FirstOrDefault(task => task.Id == updateToDoMV.Id
@@ -179,7 +188,7 @@ namespace ToDoList.Core.Managers.ToDo
             return _mapper.Map<ToDoMV>(task);
         }
 
-        public void DeleteTask(int id, int loggedInUserId)
+        public void DeleteTask(int loggedInUserId, int id)
         {
             var task = _context.ToDoes
                             .FirstOrDefault(task => task.Id == id && task.AssignedBy == loggedInUserId)
@@ -188,7 +197,7 @@ namespace ToDoList.Core.Managers.ToDo
             _context.SaveChanges();
         }
 
-        public void HasRead(int id, int loggedInUserId)
+        public void HasRead(int loggedInUserId, int id)
         {
             var task = _context.ToDoes
                             .FirstOrDefault(task => task.Id == id && task.AssignedTo == loggedInUserId)
@@ -197,20 +206,64 @@ namespace ToDoList.Core.Managers.ToDo
             _context.SaveChanges();
         }
 
-        public List<ToDoMV> GetArchivedTasks()
+        public GetAllTasksResponse GetArchivedTasks(int page = 1, 
+                                                    int pageSize = 10, 
+                                                    string sortColumn = "", 
+                                                    string sortDirection = "ascending", 
+                                                    string searchText = "")
         {
             _context.IgnoreFilter = true;
-            var tasks = _context.ToDoes.Where(task => task.Archived);
-            var res = _mapper.Map<List<ToDoMV>>(tasks);
+
+            var tasks = _context.ToDoes
+                                .Where(task => task.Archived
+                                             && (string.IsNullOrWhiteSpace(searchText)
+                                             || (task.Title.Contains(searchText)
+                                             || task.Content.Contains(searchText))));
+
             _context.IgnoreFilter = false;
-            return res;
+
+            if (!string.IsNullOrWhiteSpace(sortColumn) && sortDirection.Equals("ascending", StringComparison.InvariantCultureIgnoreCase))
+            {
+                tasks = tasks.OrderBy(sortColumn);
+            }
+            else if (!string.IsNullOrWhiteSpace(sortColumn) && sortDirection.Equals("descending", StringComparison.InvariantCultureIgnoreCase))
+            {
+                tasks = tasks.OrderByDescending(sortColumn);
+            }
+
+            var res = tasks.GetPaged(page, pageSize);
+
+            var assignedByIds = res.Data
+                             .Select(a => a.AssignedBy)
+                             .Distinct()
+                             .ToList();
+
+            var assignedToIds = res.Data
+                             .Select(a => a.AssignedTo)
+                             .Distinct()
+                             .ToList();
+
+            var creators = _context.Users
+                                     .Where(a => assignedByIds.Contains(a.Id))
+                                     .ToDictionary(a => a.Id, x => _mapper.Map<GetUserMV>(x));
+
+            var users = _context.Users
+                                     .Where(a => assignedToIds.Contains(a.Id))
+                                     .ToDictionary(a => a.Id, x => _mapper.Map<GetUserMV>(x));
+
+            var data = new GetAllTasksResponse
+            {
+                Tasks = _mapper.Map<PagedResult<ToDoMV>>(res),
+                Creators = creators,
+                Users = users,
+            };
+
+            data.Tasks.Sortable.Add("Title", "Title");
+
+            return data;
         }
 
         #endregion Public Methods
-
-        #region Private Methods
-        //private static bool
-        #endregion Private Methods
 
     }
 }
