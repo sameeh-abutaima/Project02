@@ -82,7 +82,7 @@ namespace ToDoList.Controllers
             return File(byteArray, "image/jpeg", fileName);
         }
 
-        [HttpDelete]
+        [HttpPatch]
         [Route("api/user/delete/{id}")]
         [ToDoListAuthorize()]
         public IActionResult Delete(int id)
